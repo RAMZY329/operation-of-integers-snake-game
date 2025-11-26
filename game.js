@@ -16,18 +16,33 @@
   const bgm = document.getElementById('bgm');
   const victorySound = document.getElementById('victorySound');
   // Basic game constants and helpers (ensure these exist before other functions)
-  const TILE = 32;
+  let TILE = 32;
   function resizeCanvas(){
-    // fit canvas to window while preserving integer grid
-    canvas.width = Math.floor(window.innerWidth / TILE) * TILE;
-    canvas.height = Math.floor((window.innerHeight - 120) / TILE) * TILE;
+    // choose TILE based on available width for small screens
+    const w = window.innerWidth;
+    if(w <= 360) TILE = 16;
+    else if(w <= 420) TILE = 20;
+    else if(w <= 600) TILE = 24;
+    else TILE = 32;
+
+    // compute grid size to fit the viewport (leave room for HUD ~120px)
+    const rawGridW = Math.max(10, Math.floor(window.innerWidth / TILE));
+    const rawGridH = Math.max(8, Math.floor((window.innerHeight - 120) / TILE));
+    gridW = rawGridW; gridH = rawGridH;
+
+    // handle devicePixelRatio for crisp rendering
+    const scale = window.devicePixelRatio || 1;
+    canvas.style.width = (gridW * TILE) + 'px';
+    canvas.style.height = (gridH * TILE) + 'px';
+    canvas.width = gridW * TILE * scale;
+    canvas.height = gridH * TILE * scale;
+    ctx.setTransform(scale,0,0,scale,0,0);
+
+    W = canvas.width / (window.devicePixelRatio || 1);
+    H = canvas.height / (window.devicePixelRatio || 1);
   }
+  let W = 0, H = 0, gridW = 12, gridH = 8;
   resizeCanvas(); window.addEventListener('resize', resizeCanvas);
-  let W = canvas.width, H = canvas.height;
-  let gridW = Math.max(12, Math.floor(W / TILE));
-  let gridH = Math.max(8, Math.floor(H / TILE));
-  // Update on resize
-  window.addEventListener('resize', ()=>{ W = canvas.width; H = canvas.height; gridW = Math.max(12, Math.floor(W / TILE)); gridH = Math.max(8, Math.floor(H / TILE)); });
 
   // Simple helpers
   function rInt(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
@@ -52,6 +67,27 @@
 
   // desired AI timing per level (seconds for correct AI to reach correct answer)
   const levelTimes = { 1:6, 2:5, 3:5, 4:4, 5:3, 6:3 };
+
+  // Rotate/portrait overlay handling: show overlay when height > width (portrait)
+  const rotateOverlay = document.getElementById('rotateOverlay');
+  let _wasPlayingBeforeRotate = false;
+  function checkOrientation(){
+    try{
+      const isPortrait = window.innerHeight > window.innerWidth;
+      if(isPortrait){
+        if(rotateOverlay) rotateOverlay.classList.remove('hidden');
+        // pause gameplay while in portrait
+        if(state === 'playing'){ _wasPlayingBeforeRotate = true; state = 'paused'; }
+      } else {
+        if(rotateOverlay) rotateOverlay.classList.add('hidden');
+        if(_wasPlayingBeforeRotate){ state = 'playing'; _wasPlayingBeforeRotate = false; }
+      }
+    }catch(e){ /* ignore */ }
+  }
+  // run on load and on resize/orientation changes
+  window.addEventListener('resize', checkOrientation);
+  window.addEventListener('orientationchange', ()=>{ setTimeout(checkOrientation, 120); });
+  setTimeout(checkOrientation, 50);
   function genProblem(){
     if(currentLevel===3){
       ops = ['+','-','*']; // add multiplication

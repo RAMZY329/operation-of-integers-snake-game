@@ -57,10 +57,11 @@ button:active { transform: translateY(1px); }
 .cluster button { min-width: 56px; min-height: 56px; padding: 10px; background: var(--mobile-btn-bg); box-shadow: none; touch-action: manipulation; font-weight: 700; }
 
 @media (max-width: 720px) {
-  #hud { grid-template-columns: 1fr; gap: 6px; padding: 8px; }
-  #problemText { font-size: 1.2rem; line-height:1; }
-  #gameCanvas { height: calc(100vh - 180px); }
-  #mobileControls { display: flex; bottom: 5px; }
+  #hud { grid-template-columns: 1fr; gap: 6px; padding: 6px 6px; font-size: 0.95rem; }
+  #problemText { font-size: 1.05rem; line-height:1; }
+  #gameCanvas { height: calc(100vh - 140px); }
+  #mobileControls { display: flex; bottom: 4px; }
+  .themes, .labels { display: none; } /* hide to free vertical space */
   .labels .touch { display: inline; }
   .labels .kbd { display: none; }
   .themes { justify-self: start; margin-top: 4px; }
@@ -71,16 +72,17 @@ button:active { transform: translateY(1px); }
 }
 
 @media (max-width: 480px) {
-  #hud { grid-template-columns: 1fr; gap: 4px; padding: 6px; }
-  #problemText { font-size: 1rem; line-height: 1; }
-  #gameCanvas { height: calc(100vh - 160px); }
-  #mobileControls { bottom: 3px; gap: 12px; }
-  .cluster button { min-width: 46px; min-height: 46px; padding: 6px; font-size: 1rem; }
-  .theme-btn{ padding: 4px 6px; font-size: 0.75rem; margin-left: 3px; }
-  .panel { padding: 12px; }
-  .panel h1, .panel h2 { font-size: 1.2rem; margin: 6px 0; }
-  .panel p { font-size: 0.9rem; margin: 6px 0; }
-  .name-entry input { font-size: 0.95rem; }
+  #hud { grid-template-columns: 1fr; gap: 3px; padding: 4px 6px; font-size: 0.9rem; }
+  #problemText { font-size: 0.95rem; line-height: 1; }
+  #gameCanvas { height: calc(100vh - 110px); }
+  #mobileControls { bottom: 3px; gap: 10px; }
+  .cluster button { min-width: 44px; min-height: 44px; padding: 6px; font-size: 0.95rem; }
+  .theme-btn{ padding: 3px 6px; font-size: 0.72rem; margin-left: 3px; }
+  .panel { padding: 10px; }
+  .panel h1, .panel h2 { font-size: 1.1rem; margin: 6px 0; }
+  .panel p { font-size: 0.85rem; margin: 6px 0; }
+  .name-entry input { font-size: 0.9rem; }
+  .themes { display: none; }
 }
 
 @media (min-width: 721px) and (max-height: 600px) {
@@ -89,6 +91,40 @@ button:active { transform: translateY(1px); }
   #problemText { font-size: 1.3rem; }
   #gameCanvas { height: calc(100vh - 100px); }
   .cluster button { min-width: 48px; min-height: 48px; }
+}
+
+/* When device is in landscape on small screens, move mobile controls to bottom-right */
+@media (max-width: 720px) and (orientation: landscape) {
+  #mobileControls {
+    left: auto;
+    right: 8px;
+    bottom: 8px;
+    transform: none;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+  .cluster { flex-direction: column; }
+  .cluster .row { display:flex; flex-direction: column; gap:8px; }
+  .cluster button { min-width: 44px; min-height: 44px; padding:6px; font-size:0.95rem; opacity:0.85; box-shadow: 0 2px 0 rgba(0,0,0,0.25); }
+  .cluster button:active { opacity:1; transform: translateY(1px); }
+}
+
+@media (max-width: 360px) and (orientation: landscape) {
+  #mobileControls { right: 6px; bottom: 6px; }
+  .cluster button { min-width: 36px; min-height: 36px; padding:5px; font-size:0.9rem; opacity:0.8; }
+  .cluster button:active { opacity:1; transform: translateY(1px); }
+}
+
+/* Very narrow phones: compact everything and maximize canvas */
+@media (max-width: 360px){
+  #hud { padding: 4px 6px; gap: 2px; font-size: 0.85rem; }
+  #problemText { font-size: 0.9rem; }
+  #gameCanvas { height: calc(100vh - 90px); }
+  #mobileControls { bottom: 2px; }
+  .cluster button { min-width: 40px; min-height: 40px; font-size: 0.9rem; }
+  .panel { width: 90vw; padding: 8px; }
+  .name-entry input { min-width: 100%; }
 }
 
 /* Theme buttons smaller */
