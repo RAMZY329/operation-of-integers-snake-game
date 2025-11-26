@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0f1223" />
+  <title>Operations of Integers — Single Player</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="hud">
+    <div class="scores">
+      <span id="p1Score">Score: 0</span>
+    </div>
+    <div class="level">
+      <span id="levelText">Level: 1</span>
+      <span id="comboText"></span>
+    </div>
+    <div class="themes">
+      <label for="themeSelect" class="vis">Theme</label>
+      <div id="themeButtons">
+        <button data-theme="default" class="theme-btn">Default</button>
+        <button data-theme="teal" class="theme-btn">Teal</button>
+        <button data-theme="coral" class="theme-btn">Coral</button>
+      </div>
+    </div>
+    <div id="problemText">Press Start to play!</div>
+    <div class="timer-controls">
+      <span id="timer">05:00</span>
+      <span id="powerUpText"></span>
+      <div class="labels">
+        <span class="kbd">Controls: Arrow keys</span>
+        <span class="touch">Tap arrows below</span>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="mobileControls">
+    <div class="cluster" id="p1Controls">
+      <div class="row">
+        <button data-p="p1" data-dir="up">↑</button>
+      </div>
+      <div class="row">
+        <button data-p="p1" data-dir="left">←</button>
+        <button data-p="p1" data-dir="down">↓</button>
+        <button data-p="p1" data-dir="right">→</button>
+      </div>
+    </div>
+    <!-- Removed p2 controls for single player mode -->
+  </div>
+
+  <div id="startScreen" class="overlay">
+    <div class="panel">
+      <h1>Operations of Integers — Single Player</h1>
+      <p>Solve integer addition, subtraction, multiplication & division. Eat the correct answer to score!</p>
+      <div class="name-entry">
+        <label for="playerName">Player name</label>
+        <input id="playerName" type="text" placeholder="Enter your name" />
+      </div>
+      <ul class="mini">
+        <li>5 levels of increasing difficulty</li>
+        <li>Combo system: 3+ correct = 1.5× multiplier</li>
+        <li>Random power-ups: ⚡ Speed, ❄ Slow AI, 🛡 Shield</li>
+        <li>Wrong answer: −1 point (unless shielded)</li>
+        <li>Beat level 6 to become Integer Master!</li>
+      </ul>
+      <ul class="mini">
+        <li>Numbers range: −20 to +20</li>
+        <li>Match length: 5 minutes</li>
+        <li>Snake grows when eating any tile</li>
+        <li>Self-collision: no score penalty</li>
+        <li>Out of bounds: bounce</li>
+      </ul>
+      <p><strong>Controls</strong> — Arrow keys (desktop) or tap on-screen arrows (mobile)</p>
+      <button id="startBtn" disabled>Start Game</button>
+      <p class="status" id="statusMsg">Good luck!</p>
+    </div>
+  </div>
+
+  <div id="transientOverlay" class="overlay hidden">
+    <div class="panel">
+      <h2 id="transientTitle"></h2>
+      <p id="transientBody"></p>
+    </div>
+  </div>
+
+  <div id="endScreen" class="overlay hidden">
+    <div class="panel">
+      <h2 id="resultTitle">Result</h2>
+      <p>Time's up. Want another round?</p>
+      <button id="restartBtn">Play Again</button>
+    </div>
+  </div>
+
+  <audio id="bgm" src="Pixelated Symphony.mp3" preload="auto" loop></audio>
+  <audio id="victorySound" src="Victory Sound Effect.mp3" preload="auto"></audio>
+  <script src="game.js" defer></script>
+  <script>
+    // Lock to landscape on mobile devices
+    if(screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock('landscape').catch(()=>{});
+    }
+    // Relock after orientation change
+    if(window.orientation !== undefined){
+      window.addEventListener('orientationchange', ()=>{
+        if(screen.orientation && screen.orientation.lock){
+          screen.orientation.lock('landscape').catch(()=>{});
+        }
+      });
+    }
+  </script>
+</body>
+</html>
