@@ -17,12 +17,15 @@
   const victorySound = document.getElementById('victorySound');
   // Basic game constants and helpers (ensure these exist before other functions)
   let TILE = 32;
+  let _origTile = TILE;
   function resizeCanvas(){
     // Force landscape aspect ratio (16:9) regardless of device orientation
     const w = window.innerWidth;
-    if(w <= 360) TILE = 16;
-    else if(w <= 420) TILE = 20;
-    else if(w <= 600) TILE = 24;
+    // choose TILE smaller on phones so the grid appears wider
+    if(w <= 320) TILE = 10;
+    else if(w <= 360) TILE = 12;
+    else if(w <= 420) TILE = 14;
+    else if(w <= 600) TILE = 18;
     else TILE = 32;
 
     // Get HUD height from CSS variable and compute available space
@@ -292,7 +295,8 @@
     ctx.save();
     ctx.globalAlpha = 0.06;
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 28px system-ui';
+    // scale watermark font with TILE so it remains proportional on small screens
+    ctx.font = `bold ${Math.max(10, Math.floor(TILE * 0.9))}px system-ui`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     const spacingX = 300; const spacingY = 160;
@@ -319,8 +323,9 @@
     ctx.fillStyle='#3b4aa8'; ctx.strokeStyle='#202a6a';
     for(const a of game.answers){
       const x = gridOffsetX + a.x*TILE, y = a.y*TILE;
-      ctx.beginPath(); ctx.rect(x+2,y+2,TILE-4,TILE-4); ctx.fill(); ctx.stroke();
-      ctx.fillStyle='#e9ecf1'; ctx.font='bold 14px system-ui'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.beginPath(); ctx.rect(x+2,y+2,Math.max(8,TILE-4),Math.max(8,TILE-4)); ctx.fill(); ctx.stroke();
+      ctx.fillStyle='#e9ecf1'; ctx.font = `bold ${Math.max(10, Math.floor(TILE * 0.45))}px system-ui`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText(String(a.value), x+TILE/2, y+TILE/2);
       ctx.fillStyle='#3b4aa8';
     }
@@ -335,7 +340,7 @@
       else if(p.type==='shield'){ color='#ff00ff'; sym='🛡'; }
       ctx.fillStyle=color; ctx.strokeStyle='#ffffff40';
       ctx.beginPath(); ctx.arc(x+TILE/2, y+TILE/2, TILE/2-2, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-      ctx.fillStyle='#000000'; ctx.font='bold 16px system-ui'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle='#000000'; ctx.font = `bold ${Math.max(10, Math.floor(TILE * 0.5))}px system-ui`; ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText(sym, x+TILE/2, y+TILE/2);
     }
   }
@@ -538,6 +543,15 @@
       return;
     }
     state='playing'; scores.p1=0; levelProgress=0; comboCount=0; comboMultiplier=1; activePowerUps=[]; timer=300000; acc=0; lastTs=0;
+    // collapse HUD to minimal bar and apply a slight zoom-out on small screens
+    const hudEl = document.getElementById('hud'); if(hudEl){ hudEl.classList.add('collapsed-during-play'); }
+    // small visual zoom-out: reduce TILE slightly for small screens to fit more content
+    _origTile = TILE;
+    if(window.innerWidth <= 720){ TILE = Math.max(8, Math.floor(TILE * 0.85)); }
+    // recalc canvas/grid with new TILE
+    resizeCanvas();
+    // position canvas at top so it uses the freed HUD space visually
+    canvas.style.top = '0px';
     // reset snake
     // reset player snake
     game.snakes = [p1];
@@ -556,6 +570,11 @@
   }
   function endMatch(){
     state='ended'; startScreen.classList.add('hidden'); endScreen.classList.remove('hidden');
+    // restore HUD after match
+    const hudEl2 = document.getElementById('hud'); if(hudEl2){ hudEl2.classList.remove('collapsed-during-play'); }
+    // restore TILE and recalc canvas
+    TILE = _origTile; resizeCanvas();
+    canvas.style.top = '';
     const levelText = lastCompletedLevel>0 ? `Highest Level Completed: ${lastCompletedLevel}` : 'No levels completed';
     let titleSuffix = '';
     if(achievedEliteStreak){ titleSuffix = ' — Elite Integer Master'; }

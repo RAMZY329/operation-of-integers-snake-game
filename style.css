@@ -109,3 +109,21 @@ button:active { transform: translateY(1px); }
 .theme-btn{ padding:6px 10px; margin-left:6px; font-weight:700; border-radius:6px; }
 .themes { justify-self: end; }
 .vis{position:absolute;left:-9999px}
+
+/* hide HUD smoothly while playing to maximize vertical space */
+#hud.hidden-during-play{ transform: translateY(-110%); transition: transform 220ms ease; }
+
+/* collapsed HUD during play: show minimal info (score, level, timer) */
+#hud.collapsed-during-play{
+  height: 32px !important;
+  padding: 4px 8px !important;
+  transform: translateY(0) !important;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+}
+#hud.collapsed-during-play .scores{ order: 1; }
+#hud.collapsed-during-play #problemText, #hud.collapsed-during-play .themes, #hud.collapsed-during-play .labels{ display: none !important; }
+#hud.collapsed-during-play #levelText, #hud.collapsed-during-play #timer{ font-weight:700; }
