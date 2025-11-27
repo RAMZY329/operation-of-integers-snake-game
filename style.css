@@ -1,9 +1,9 @@
 * { box-sizing: border-box; }
-html, body { height: 100%; width: 100%; }
+html, body { height: 100%; width: 100%; margin: 0; padding: 0; }
 body {
   margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   background: #0f1223; color: #e9ecf1; display: flex; flex-direction: column;
-  overflow: hidden; position: fixed;
+  overflow: hidden; position: fixed; width: 100vw; height: 100vh;
 }
 #root-theme-default {}
 /* Theme variables */
@@ -16,19 +16,22 @@ body {
   --button-shadow: #3346b8;
   --mobile-btn-bg: #26306b;
   --canvas-bg: #0a0d1a;
+  --hud-height: 60px;
 }
 .theme-teal{ --hud-bg:#0f2b2b; --panel-bg:#0e2a2a; --panel-border:#1e4a4a; --button-bg:#14b8a6; --button-shadow:#0e7f73; --mobile-btn-bg:#0b6b61; --canvas-bg:#031b1a; }
 .theme-coral{ --hud-bg:#3b1e1b; --panel-bg:#2f1a18; --panel-border:#532a28; --button-bg:#ff6b6b; --button-shadow:#b84444; --mobile-btn-bg:#6b2f2f; --canvas-bg:#1b0a0a; }
 #hud {
   display: grid; grid-template-columns: 1fr 2fr 1fr 240px; align-items: center;
   gap: 12px; padding: 10px 12px; background: var(--hud-bg); border-bottom: 1px solid var(--hud-border);
+  height: var(--hud-height); flex-shrink: 0; overflow: hidden;
 }
 #hud .scores { display: flex; gap: 16px; font-weight: 600; }
 #problemText { text-align: center; font-weight: 700; font-size: 1.5rem; line-height:1.1; }
 #timer { font-weight: 700; }
 #hud .labels { margin-top: 6px; opacity: 0.75; font-size: 0.9rem; display: flex; gap: 10px; }
 
-#gameCanvas { flex: 1; display: block; width: 100%; height: auto; background: #0a0d1a; }
+/* Canvas sits under the HUD and fills available width; height is set by JS to keep landscape aspect */
+#gameCanvas { display: block; width: 100vw; background: var(--canvas-bg); position: absolute; left: 0; right: 0; top: var(--hud-height); margin: 0 auto; }
 
 .overlay { position: fixed; inset: 0; background: rgba(10,12,25,0.75); display: grid; place-items: center; }
 .overlay.hidden { display: none; }
@@ -57,74 +60,49 @@ button:active { transform: translateY(1px); }
 .cluster button { min-width: 56px; min-height: 56px; padding: 10px; background: var(--mobile-btn-bg); box-shadow: none; touch-action: manipulation; font-weight: 700; }
 
 @media (max-width: 720px) {
-  #hud { grid-template-columns: 1fr; gap: 6px; padding: 6px 6px; font-size: 0.95rem; }
-  #problemText { font-size: 1.05rem; line-height:1; }
-  #gameCanvas { height: calc(100vh - 140px); }
+  :root { --hud-height: 50px; }
+  #hud { grid-template-columns: 1fr; gap: 4px; padding: 5px 6px; font-size: 0.9rem; }
+  #problemText { font-size: 1rem; line-height: 1; }
   #mobileControls { display: flex; bottom: 4px; }
-  .themes, .labels { display: none; } /* hide to free vertical space */
-  .labels .touch { display: inline; }
-  .labels .kbd { display: none; }
-  .themes { justify-self: start; margin-top: 4px; }
-  .theme-btn{ padding: 4px 8px; font-size: 0.85rem; margin-left: 4px; }
-  .cluster button { min-width: 50px; min-height: 50px; padding: 8px; font-size: 1.2rem; }
-  .name-entry { flex-direction: column; align-items: flex-start; margin: 8px 0; }
-  .name-entry input { min-width: 100%; }
+  .themes, .labels { display: none; }
+  .cluster button { min-width: 48px; min-height: 48px; padding: 8px; font-size: 1rem; }
 }
 
 @media (max-width: 480px) {
-  #hud { grid-template-columns: 1fr; gap: 3px; padding: 4px 6px; font-size: 0.9rem; }
-  #problemText { font-size: 0.95rem; line-height: 1; }
-  #gameCanvas { height: calc(100vh - 110px); }
-  #mobileControls { bottom: 3px; gap: 10px; }
-  .cluster button { min-width: 44px; min-height: 44px; padding: 6px; font-size: 0.95rem; }
-  .theme-btn{ padding: 3px 6px; font-size: 0.72rem; margin-left: 3px; }
-  .panel { padding: 10px; }
-  .panel h1, .panel h2 { font-size: 1.1rem; margin: 6px 0; }
-  .panel p { font-size: 0.85rem; margin: 6px 0; }
-  .name-entry input { font-size: 0.9rem; }
-  .themes { display: none; }
+  :root { --hud-height: 44px; }
+  #hud { grid-template-columns: 1fr; gap: 2px; padding: 4px 4px; font-size: 0.85rem; }
+  #problemText { font-size: 0.9rem; line-height: 1; }
+  #mobileControls { bottom: 3px; gap: 8px; }
+  .cluster button { min-width: 44px; min-height: 44px; padding: 6px; font-size: 0.9rem; }
+  .theme-btn { padding: 3px 6px; font-size: 0.7rem; margin-left: 2px; }
 }
 
-@media (min-width: 721px) and (max-height: 600px) {
-  /* landscape on larger phones/tablets */
-  #hud { grid-template-columns: 1fr 2fr 1fr 240px; padding: 8px; gap: 8px; }
-  #problemText { font-size: 1.3rem; }
-  #gameCanvas { height: calc(100vh - 100px); }
-  .cluster button { min-width: 48px; min-height: 48px; }
+@media (max-width: 360px) {
+  :root { --hud-height: 40px; }
+  #hud { grid-template-columns: 1fr; gap: 1px; padding: 3px 4px; font-size: 0.8rem; }
+  #problemText { font-size: 0.85rem; line-height: 1; }
+  #mobileControls { bottom: 2px; }
+  .cluster button { min-width: 40px; min-height: 40px; padding: 5px; font-size: 0.85rem; }
 }
 
-/* When device is in landscape on small screens, move mobile controls to bottom-right */
-@media (max-width: 720px) and (orientation: landscape) {
+@media (orientation: landscape) and (max-width: 720px) {
+  :root { --hud-height: 45px; }
+  #hud { grid-template-columns: 1fr 1fr 1fr; gap: 4px; padding: 4px 6px; font-size: 0.8rem; }
+  #problemText { font-size: 0.9rem; }
   #mobileControls {
     left: auto;
-    right: 8px;
-    bottom: 8px;
+    right: 6px;
+    bottom: 6px;
     transform: none;
     flex-direction: column;
     align-items: flex-end;
-    gap: 8px;
+    gap: 6px;
   }
   .cluster { flex-direction: column; }
-  .cluster .row { display:flex; flex-direction: column; gap:8px; }
-  .cluster button { min-width: 44px; min-height: 44px; padding:6px; font-size:0.95rem; opacity:0.85; box-shadow: 0 2px 0 rgba(0,0,0,0.25); }
-  .cluster button:active { opacity:1; transform: translateY(1px); }
-}
-
-@media (max-width: 360px) and (orientation: landscape) {
-  #mobileControls { right: 6px; bottom: 6px; }
-  .cluster button { min-width: 36px; min-height: 36px; padding:5px; font-size:0.9rem; opacity:0.8; }
-  .cluster button:active { opacity:1; transform: translateY(1px); }
-}
-
-/* Very narrow phones: compact everything and maximize canvas */
-@media (max-width: 360px){
-  #hud { padding: 4px 6px; gap: 2px; font-size: 0.85rem; }
-  #problemText { font-size: 0.9rem; }
-  #gameCanvas { height: calc(100vh - 90px); }
-  #mobileControls { bottom: 2px; }
-  .cluster button { min-width: 40px; min-height: 40px; font-size: 0.9rem; }
-  .panel { width: 90vw; padding: 8px; }
-  .name-entry input { min-width: 100%; }
+  .cluster .row { display: flex; flex-direction: column; gap: 6px; }
+  .cluster button { min-width: 40px; min-height: 40px; padding: 5px; font-size: 0.85rem; opacity: 0.85; box-shadow: 0 2px 0 rgba(0,0,0,0.3); }
+  .cluster button:active { opacity: 1; transform: translateY(1px); }
+  .themes, .labels { display: none; }
 }
 
 /* Theme buttons smaller */

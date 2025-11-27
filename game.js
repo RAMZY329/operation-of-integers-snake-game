@@ -18,30 +18,55 @@
   // Basic game constants and helpers (ensure these exist before other functions)
   let TILE = 32;
   function resizeCanvas(){
-    // choose TILE based on available width for small screens
+    // Force landscape aspect ratio (16:9) regardless of device orientation
     const w = window.innerWidth;
     if(w <= 360) TILE = 16;
     else if(w <= 420) TILE = 20;
     else if(w <= 600) TILE = 24;
     else TILE = 32;
 
-    // compute grid size to fit the viewport (leave room for HUD ~120px)
-    const rawGridW = Math.max(10, Math.floor(window.innerWidth / TILE));
-    const rawGridH = Math.max(8, Math.floor((window.innerHeight - 120) / TILE));
-    gridW = rawGridW; gridH = rawGridH;
+    // Get HUD height from CSS variable and compute available space
+    const style = getComputedStyle(document.documentElement);
+    const hudHeight = parseInt(style.getPropertyValue('--hud-height')) || 50;
+    const availH = window.innerHeight - hudHeight;
+    const availW = window.innerWidth;
+    
+    // Maintain 16:9 landscape aspect ratio
+    let canvasW = availW;
+    let canvasH = canvasW * 9 / 16;
+    if(canvasH > availH){
+      canvasH = availH;
+      canvasW = canvasH * 16 / 9;
+    }
+    
+    // Compute grid from constrained canvas size
+    gridW = Math.max(10, Math.floor(canvasW / TILE));
+    gridH = Math.max(8, Math.floor(canvasH / TILE));
+    
+    // Recalculate actual canvas dimensions based on grid
+    const actualW = gridW * TILE;
+    const actualH = gridH * TILE;
 
-    // handle devicePixelRatio for crisp rendering
+    // Use available full width for CSS so canvas visually fills the viewport width
+
+    // Handle devicePixelRatio for crisp rendering
     const scale = window.devicePixelRatio || 1;
-    canvas.style.width = (gridW * TILE) + 'px';
-    canvas.style.height = (gridH * TILE) + 'px';
-    canvas.width = gridW * TILE * scale;
-    canvas.height = gridH * TILE * scale;
+    // CSS size: full available width, and computed height
+    canvas.style.width = availW + 'px';
+    canvas.style.height = actualH + 'px';
+    // Backing store size uses scale
+    canvas.width = Math.round(availW * scale);
+    canvas.height = Math.round(actualH * scale);
     ctx.setTransform(scale,0,0,scale,0,0);
 
-    W = canvas.width / (window.devicePixelRatio || 1);
-    H = canvas.height / (window.devicePixelRatio || 1);
+    // Logical drawing area (we'll draw within gridW x gridH tiles)
+    W = availW;
+    H = actualH;
+    // center grid horizontally inside the canvas
+    gridOffsetX = Math.floor((availW - actualW) / 2);
   }
   let W = 0, H = 0, gridW = 12, gridH = 8;
+  let gridOffsetX = 0;
   resizeCanvas(); window.addEventListener('resize', resizeCanvas);
 
   // Simple helpers
@@ -68,26 +93,7 @@
   // desired AI timing per level (seconds for correct AI to reach correct answer)
   const levelTimes = { 1:6, 2:5, 3:5, 4:4, 5:3, 6:3 };
 
-  // Rotate/portrait overlay handling: show overlay when height > width (portrait)
-  const rotateOverlay = document.getElementById('rotateOverlay');
-  let _wasPlayingBeforeRotate = false;
-  function checkOrientation(){
-    try{
-      const isPortrait = window.innerHeight > window.innerWidth;
-      if(isPortrait){
-        if(rotateOverlay) rotateOverlay.classList.remove('hidden');
-        // pause gameplay while in portrait
-        if(state === 'playing'){ _wasPlayingBeforeRotate = true; state = 'paused'; }
-      } else {
-        if(rotateOverlay) rotateOverlay.classList.add('hidden');
-        if(_wasPlayingBeforeRotate){ state = 'playing'; _wasPlayingBeforeRotate = false; }
-      }
-    }catch(e){ /* ignore */ }
-  }
-  // run on load and on resize/orientation changes
-  window.addEventListener('resize', checkOrientation);
-  window.addEventListener('orientationchange', ()=>{ setTimeout(checkOrientation, 120); });
-  setTimeout(checkOrientation, 50);
+
   function genProblem(){
     if(currentLevel===3){
       ops = ['+','-','*']; // add multiplication
@@ -305,14 +311,14 @@
     ctx.fillStyle=s.color; ctx.strokeStyle='#00000040';
     for(let i=0;i<s.segs.length;i++){
       const seg=s.segs[i];
-      const x=seg.x*TILE, y=seg.y*TILE;
+      const x = gridOffsetX + seg.x*TILE, y = seg.y*TILE;
       ctx.beginPath(); ctx.rect(x+1,y+1,TILE-2,TILE-2); ctx.fill(); ctx.stroke();
     }
   }
   function drawAnswers(){
     ctx.fillStyle='#3b4aa8'; ctx.strokeStyle='#202a6a';
     for(const a of game.answers){
-      const x=a.x*TILE, y=a.y*TILE;
+      const x = gridOffsetX + a.x*TILE, y = a.y*TILE;
       ctx.beginPath(); ctx.rect(x+2,y+2,TILE-4,TILE-4); ctx.fill(); ctx.stroke();
       ctx.fillStyle='#e9ecf1'; ctx.font='bold 14px system-ui'; ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText(String(a.value), x+TILE/2, y+TILE/2);
@@ -322,7 +328,7 @@
 
   function drawPowerUps(){
     for(const p of game.powerUps){
-      const x=p.x*TILE, y=p.y*TILE;
+      const x = gridOffsetX + p.x*TILE, y = p.y*TILE;
       let color='#ffff00'; let sym='⚡';
       if(p.type==='speedBoost'){ color='#00ff00'; sym='⚡'; }
       else if(p.type==='aiSlow'){ color='#00ffff'; sym='❄'; }
