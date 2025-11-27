@@ -52,8 +52,9 @@ button:active { transform: translateY(1px); }
 
 #mobileControls {
   position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%);
-  display: none; gap: 18px; z-index: 5; /* hidden by default, shown on mobile */
+  display: none; gap: 18px; z-index: 20; /* shown on mobile, above HUD */
   user-select: none; max-width: 100%;
+  pointer-events: auto; /* ensure touches reach buttons */
 }
 .cluster { display: inline-flex; flex-direction: column; align-items: center; gap: 8px; }
 .cluster .row { display: flex; gap: 8px; }
@@ -113,17 +114,19 @@ button:active { transform: translateY(1px); }
 /* hide HUD smoothly while playing to maximize vertical space */
 #hud.hidden-during-play{ transform: translateY(-110%); transition: transform 220ms ease; }
 
-/* collapsed HUD during play: show minimal info (score, level, timer) */
+/* collapsed HUD during play: show problem, score, level, timer */
 #hud.collapsed-during-play{
-  height: 32px !important;
-  padding: 4px 8px !important;
+  height: auto !important;
+  padding: 6px 8px !important;
   transform: translateY(0) !important;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr 1fr 1fr;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   z-index: 10;
+  row-gap: 4px;
 }
-#hud.collapsed-during-play .scores{ order: 1; }
-#hud.collapsed-during-play #problemText, #hud.collapsed-during-play .themes, #hud.collapsed-during-play .labels{ display: none !important; }
-#hud.collapsed-during-play #levelText, #hud.collapsed-during-play #timer{ font-weight:700; }
+#hud.collapsed-during-play .scores { font-size: 0.85rem; }
+#hud.collapsed-during-play #problemText { font-size: 0.9rem; grid-column: 1 / -1; text-align: center; }
+#hud.collapsed-during-play .themes, #hud.collapsed-during-play .labels { display: none !important; }
+#hud.collapsed-during-play #levelText, #hud.collapsed-during-play #timer { font-weight:700; font-size: 0.85rem; }
